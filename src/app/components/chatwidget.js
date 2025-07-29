@@ -118,7 +118,7 @@ export default function ChatWidget() {
           </div>
           
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-opacity-95">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-opacity-95 scrollbar-gold">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -127,16 +127,16 @@ export default function ChatWidget() {
                 <div
                   className={`p-3 rounded-lg max-w-[85%] text-sm relative ${
                     msg.sender === "bot"
-                      ? "bg-[#000000] text-gray-100 rounded-tl-none border border-gray-700"
+                      ? "bg-[#000000] text-gray-100 rounded-tl-none border border-[#E4B343]"
                       : "bg-[#E4B343] text-black rounded-tr-none"
                   }`}
                 >
-                  {msg.sender === "bot" && (
+                  {/* {msg.sender === "bot" && (
                     <div className="absolute -left-1 top-0 w-3 h-3 bg-[#1F2937] border-l border-b border-gray-700 transform -skew-y-12 origin-bottom-left"></div>
-                  )}
-                  {msg.sender === "user" && (
+                  )} */}
+                  {/* {msg.sender === "user" && (
                     <div className="absolute -right-1 top-0 w-3 h-3 bg-[#E4B343] transform skew-y-12 origin-bottom-right"></div>
-                  )}
+                  )} */}
                   {msg.text}
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function ChatWidget() {
             {isTyping && (
               <div className="flex justify-start">
                 <div className="p-3 rounded-lg max-w-[85%] text-sm bg-[#1F2937] text-gray-100 rounded-tl-none border border-gray-700 relative">
-                  <div className="absolute -left-1 top-0 w-3 h-3 bg-[#1F2937] border-l border-b border-gray-700 transform -skew-y-12 origin-bottom-left"></div>
+                  {/* <div className="absolute -left-1 top-0 w-3 h-3 bg-[#1F2937] border-l border-b border-gray-700 transform -skew-y-12 origin-bottom-left"></div> */}
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
                     <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
@@ -181,6 +181,24 @@ export default function ChatWidget() {
           </div>
         </div>
       )}
+      <style jsx global>{`
+        .scrollbar-gold::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        .scrollbar-gold::-webkit-scrollbar-track {
+          background: #000000;
+          border-radius: 4px;
+        }
+        .scrollbar-gold::-webkit-scrollbar-thumb {
+          background-color: #E4B343;
+          border-radius: 4px;
+          border: 2px solid #000000;
+        }
+        .scrollbar-gold::-webkit-scrollbar-thumb:hover {
+          background-color: #d1a23c;
+        }
+      `}</style>
     </div>
   );
 }
