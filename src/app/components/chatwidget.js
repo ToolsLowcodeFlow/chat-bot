@@ -178,6 +178,9 @@ export default function ChatWidget() {
             <div className="text-xs text-gray-400 mt-1 text-center">
               Browns Autos © {new Date().getFullYear()}
             </div>
+            <div className="text-xs text-gray-400 mt-1 text-center">
+              Browns Autos © {new Date().getFullYear()}
+            </div>
           </div>
         </div>
       )}
