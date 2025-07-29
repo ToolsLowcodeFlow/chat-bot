@@ -2,8 +2,9 @@
 
 :root {
   --background: transparent;
-  /* Critical change */
-  --foreground: #171717;
+    --foreground: #171717;
+    --font-body: var(--font-open-sans);
+    --font-heading: var(--font-montserrat);
 }
 
 body {
@@ -11,6 +12,7 @@ body {
   /* Override any theme defaults */
   color: var(--foreground);
 }
+
 /* """""""""""""""""""""""""""""old one"""""""""""""""""""" */
 /* @import "tailwindcss";
 
