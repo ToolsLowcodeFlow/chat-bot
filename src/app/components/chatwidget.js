@@ -70,7 +70,7 @@ export default function ChatWidget() {
   };
 
   return (
-    <div>
+    <div style={{ background: 'transparent !important', pointerEvents: 'auto' }}>
       {/* Floating Button */}
       {!isOpen && (
         <button
@@ -174,9 +174,6 @@ export default function ChatWidget() {
               >
                 <Send size={18} color="#ecd6a3" />
               </button>
-            </div>
-            <div className="text-xs text-gray-400 mt-1 text-center">
-              Browns Autos © {new Date().getFullYear()}
             </div>
             <div className="text-xs text-gray-400 mt-1 text-center">
               Browns Autos © {new Date().getFullYear()}
