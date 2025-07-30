@@ -3,19 +3,53 @@
 import { useState, useRef, useEffect } from "react";
 import { X, MessageSquare, Maximize2, Minimize2, Send } from "lucide-react";
 import { Bot } from "lucide-react";
+import { supabase } from "@/app/lib/supabaseClient";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "Welcome to Browns Autos! I'm MotoMate, your AI assistant. How can I help you find your perfect car today?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Initialize chat session
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        // Create a new session in the database
+        const { data: sessions, error: createError } = await supabase
+          .from('chat_sessions')
+          .insert([{}])
+          .select('session_id');
+
+        if (createError) {
+          console.error('Error creating session:', createError);
+          return;
+        }
+
+        // Get the new session_id and store it
+        const newSessionId = sessions[0].session_id;
+        setSessionId(newSessionId);
+
+        // Start with welcome message
+        setMessages([getWelcomeMessage()]);
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+        // Fallback to just showing welcome message without session
+        setMessages([getWelcomeMessage()]);
+      }
+    };
+
+    initializeChat();
+  }, []);
+
+  const getWelcomeMessage = () => ({
+    sender: "bot",
+    text: "Welcome to Browns Autos! I'm MotoMate, your AI assistant. How can I help you find your perfect car today?",
+    created_at: new Date().toISOString()
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,26 +59,61 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
+  const saveMessage = async (message) => {
+    if (!sessionId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert([{
+          session_id: sessionId,
+          sender: message.sender,
+          message: message.text,
+          created_at: new Date().toISOString()
+        }]);
+        
+      if (error) console.error('Error saving message:', error);
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  };
+
+  const handleSend = async () => {
     if (!input.trim()) return;
     
-    // Add user message
-    const newMessages = [...messages, { sender: "user", text: input }];
+    // Create user message object
+    const userMessage = { sender: "user", text: input };
+    
+    // Add user message to state and save to DB
+    const newMessages = [...messages, userMessage];
     setMessages(newMessages);
+    
+    // Save message if we have a session
+    if (sessionId) {
+      await saveMessage(userMessage);
+    }
+    
     setInput("");
     setIsTyping(true);
     
     // Simulate bot response after a delay
-    setTimeout(() => {
-      setMessages([
-        ...newMessages,
-        {
-          sender: "bot",
-          text: getBotResponse(input),
-        },
-      ]);
+    setTimeout(async () => {
+      const botResponseText = getBotResponse(userMessage.text);
+      const botMessage = {
+        sender: "bot",
+        text: botResponseText
+      };
+      
+      // Add bot response to state and save to DB
+      setMessages([...newMessages, botMessage]);
+      
+      // Save message if we have a session
+      if (sessionId) {
+        await saveMessage(botMessage);
+      }
+      
       setIsTyping(false);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+    }, 1000 + Math.random() * 2000);
   };
 
   const getBotResponse = (userInput) => {
@@ -78,9 +147,6 @@ export default function ChatWidget() {
           className="fixed bottom-5 right-5 bg-[#E4B343] text-black p-4 rounded-full shadow-lg hover:bg-[#d1a23c] transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center"
         >
           <MessageSquare size={24} />
-          {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-            1
-          </span> */}
         </button>
       )}
       
@@ -131,12 +197,6 @@ export default function ChatWidget() {
                       : "bg-[#E4B343] text-black rounded-tr-none"
                   }`}
                 >
-                  {/* {msg.sender === "bot" && (
-                    <div className="absolute -left-1 top-0 w-3 h-3 bg-[#1F2937] border-l border-b border-gray-700 transform -skew-y-12 origin-bottom-left"></div>
-                  )} */}
-                  {/* {msg.sender === "user" && (
-                    <div className="absolute -right-1 top-0 w-3 h-3 bg-[#E4B343] transform skew-y-12 origin-bottom-right"></div>
-                  )} */}
                   {msg.text}
                 </div>
               </div>
@@ -144,7 +204,6 @@ export default function ChatWidget() {
             {isTyping && (
               <div className="flex justify-start">
                 <div className="p-3 rounded-lg max-w-[85%] text-sm bg-[#1F2937] text-gray-100 rounded-tl-none border border-gray-700 relative">
-                  {/* <div className="absolute -left-1 top-0 w-3 h-3 bg-[#1F2937] border-l border-b border-gray-700 transform -skew-y-12 origin-bottom-left"></div> */}
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
                     <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
@@ -162,7 +221,7 @@ export default function ChatWidget() {
               <input
                 type="text"
                 placeholder="Ask about our cars..."
-                className="flex-1 p-3 outline-none text-sm placeholder-gray-400 "
+                className="flex-1 p-3 outline-none text-sm placeholder-gray-400"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
