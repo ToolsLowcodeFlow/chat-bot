@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable}${openSans.variable} ${montserrat.variable} antialiased`}
       suppressHydrationWarning
       >
-        {children}
+       ff {children}
       </body>
     </html>
   );
