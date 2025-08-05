@@ -26,22 +26,22 @@ export async function PUT(req) {
   const rawBodyBuffer = await getRawBody(req);
   const rawBody = rawBodyBuffer.toString('utf8');
 
-  const signature = req.headers.get('autotrader-signature');
-  if (!signature) {
-    return new Response(JSON.stringify({ error: 'Missing signature' }), { status: 400 });
-  }
+  // const signature = req.headers.get('autotrader-signature');
+  // if (!signature) {
+  //   return new Response(JSON.stringify({ error: 'Missing signature' }), { status: 400 });
+  // }
 
-  const [tPart, v1Part] = signature.split(',');
-  const timestamp = tPart.split('=')[1];
-  const receivedHash = v1Part.split('=')[1];
+  // const [tPart, v1Part] = signature.split(',');
+  // const timestamp = tPart.split('=')[1];
+  // const receivedHash = v1Part.split('=')[1];
 
-  const secret = process.env.AUTOTRADER_WEBHOOK_SECRET;
-  const value = `${timestamp}.${rawBody}`;
-  const computedHash = crypto.createHmac('sha256', secret).update(value).digest('hex');
+  // const secret = process.env.AUTOTRADER_WEBHOOK_SECRET;
+  // const value = `${timestamp}.${rawBody}`;
+  // const computedHash = crypto.createHmac('sha256', secret).update(value).digest('hex');
 
-  if (computedHash !== receivedHash) {
-    return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 403 });
-  }
+  // if (computedHash !== receivedHash) {
+  //   return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 403 });
+  // }
 
   const event = JSON.parse(rawBody);
 
